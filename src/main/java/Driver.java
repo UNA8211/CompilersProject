@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class Driver {
     public static void main (String[] args) throws Exception{
-        String fileName = "C:\\Users\\Ryan Brand\\Documents\\S2018\\CSCI468\\CompilerProject\\src\\main\\java\\parse_file.txt"
+        String fileName = "C:\\Users\\Ryan Brand\\Documents\\S2018\\CSCI468\\CompilerProject\\src\\main\\java\\parse_file.txt";
         CharStream input = new ANTLRFileStream(fileName);
 
         Little littleLexer = new Little(input);
