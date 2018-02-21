@@ -1,33 +1,10 @@
-PROGRAM loop
+PROGRAM test
 BEGIN
-
-     STRING guess := "Guess a number: ";
-     STRING correct := "Correct!\n";
-     STRING wrong := "Wrong!\n";
-     STRING out1 := "It took you ";
-     STRING out2 := " guesses";
-
-	INT i;
-	INT j;
-
-	--PROTO VOID main();
-
-	FUNCTION VOID main()
+	INT a,b,c,x,y,z,h,j,k;
+	FUNCTION VOID printout (INT a,INT b,INT c)
 	BEGIN
-		i := 17;
-		j := 0;
-		k := 0;
-		WHILE (i != j)
-			WRITE(guess);
-			READ(j);
-			k := k + 1;
-			IF (i = j)
-			     WRITE(correct);
-			ELSE
-			     WRITE(wrong);
-			ENDIF
-		ENDWHILE
-
-		WRITE (out1, k, out2);
+		WRITE (a);
+		WRITE (b);
+		WRITE (c);
 	END
 END

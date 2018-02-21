@@ -5,7 +5,7 @@ public class Driver {
         String fileName = "C:\\Users\\Ryan Brand\\Documents\\S2018\\CSCI468\\CompilerProject\\src\\main\\java\\parse_file.txt";
         CharStream input = CharStreams.fromFileName(fileName);
         LexerService lexerService = new LexerService(input);
-        lexerService.fillStream();
-        lexerService.printTokens();
+        ParserService parserService = new ParserService(lexerService.getCommonTokenStream());
+        parserService.parse();
     }
 }

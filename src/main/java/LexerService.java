@@ -6,7 +6,7 @@ public class LexerService {
     private CommonTokenStream commonTokenStream = null;
 
     public LexerService(CharStream input) {
-        littleLexer = new Little(input);
+        littleLexer = new LittleLexer(input);
         commonTokenStream = new CommonTokenStream(littleLexer);
     }
 
