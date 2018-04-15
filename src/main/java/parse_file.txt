@@ -1,10 +1,40 @@
-PROGRAM test
+PROGRAM fibonacci
 BEGIN
-	INT a,b,c,x,y,z,h,j,k;
-	FUNCTION VOID printout (INT a,INT b,INT c)
+
+	STRING dummy := "abcde";
+
+	INT i,result;
+
+
+	FUNCTION INT F (INT n)
 	BEGIN
-		WRITE (a);
-		WRITE (b);
-		WRITE (c);
+
+		IF (n > 2)
+			RETURN F(n-1)+F(n-2);
+		ENDIF
+		IF (n = 0)   --This is a comment
+			RETURN 0;
+        ELSE
+			RETURN 1;
+		ENDIF
 	END
+
+
+	FUNCTION VOID main ()
+	BEGIN
+
+    INT i, end, result;
+		READ(end);
+
+	i := 0;
+ 	WHILE (i != end)
+		result := F(i);
+		WRITE (i);
+		WRITE (result);
+		i := i + 1;
+	ENDWHILE
+
+
+	END
+
 END
