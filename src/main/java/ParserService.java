@@ -1,3 +1,4 @@
+import nodes.ASTNode;
 import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -16,13 +17,22 @@ public class ParserService {
 
     public void parse() {
         LittleBaseListener listener = new LittleBaseListener();
+        ASTListener ast = new ASTListener();
+        littleParser.addParseListener(ast);
         ParseTree context = littleParser.program();
+        printAST(ast.prev);
+        CodeGenerator cg = new CodeGenerator(ast.prev);
+        cg.begin();
         ParseTreeWalker.DEFAULT.walk(listener, context);
         if (littleParser.getNumberOfSyntaxErrors() != 0) {
             System.err.println("ERROR: INPUT FILE CONTAINED SYNTAX ERRORS");
             System.exit(1);
         }
-        printTable(listener);
+//        printTable(listener);
+    }
+
+    public void printAST(ASTNode starting) {
+        System.out.println(starting.toString());
     }
 
     public void printTable(LittleBaseListener listener) {
