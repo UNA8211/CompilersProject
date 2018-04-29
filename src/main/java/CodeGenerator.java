@@ -38,6 +38,71 @@ public class CodeGenerator {
 
     public void walkThroughFuncDecl(FuncDeclNode funcDeclNode) {
         System.out.println("label " + funcDeclNode.id.toString());
+
+        walkThroughFuncBody(funcDeclNode.funcBody);
+    }
+
+    public void walkThroughFuncBody(FuncBodyNode funcBody) {
+        if (funcBody.decl != null) {
+            walkThroughDecl(funcBody.decl);
+        }
+
+        if (funcBody.stmtList != null) {
+            walkThroughStatementList(funcBody.stmtList);
+        }
+    }
+
+    public void walkThroughStatementList(StatementListNode stmtList) {
+        if (stmtList.stmt != null) {
+            walkThroughStatement(stmtList.stmt);
+        }
+
+        if (stmtList.statementList != null) {
+            walkThroughStatementList(stmtList.statementList);
+        }
+    }
+
+    public void walkThroughStatement(StatementNode stmt) {
+        if (stmt.baseStmt != null) {
+            walkThroughBaseStatement(stmt.baseStmt);
+        }
+    }
+
+    public void walkThroughBaseStatement(BaseStatements base) {
+        walkThroughAssignmentStatement(base.assignment);
+    }
+
+    public void walkThroughAssignmentStatement(AssignStatementNode assign) {
+        walkThroughAssignmentExpression(assign.assignmentExpr);
+    }
+
+    public void walkThroughAssignmentExpression(AssignmentExprNode assign) {
+        String identifier = assign.identifier.toString();
+        walkThroughExpr(assign.expr);
+    }
+
+    public void walkThroughExpr(ExpressionNode expression) {
+        if (expression.prefix != null) {
+            walkThroughExprPrefix(expression.prefix);
+        }
+    }
+
+    public void walkThroughExprPrefix(ExpressionPrefix prefix) {
+        if (prefix.prefix != null) {
+            walkThroughExprPrefix(prefix.prefix);
+        }
+    }
+
+    public void walkThroughFactor(FactorNode factor) {
+
+    }
+
+    public void walkThroughFactorPrefix(FactorPrefixNode prefix) {
+
+    }
+
+    public void walkThroughPostFix(PostfixNode postfix) {
+
     }
 
     public void walkThroughDecl(DeclNode declNode) {

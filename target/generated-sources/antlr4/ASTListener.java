@@ -30,6 +30,10 @@ public class ASTListener implements LittleListener {
             ((IDTailNode) current).identifier = new IDNode(ctx.IDENTIFIER().getText());
         } else if (current instanceof FuncDeclNode) {
             ((FuncDeclNode) current).id = new IDNode(ctx.IDENTIFIER().getText());
+        } else if (current instanceof PrimaryNode) {
+            ((PrimaryNode) current).id = new IDNode(ctx.IDENTIFIER().getText());
+        } else if (current instanceof AssignmentExprNode) {
+            ((AssignmentExprNode) current).identifier = new IDNode(ctx.IDENTIFIER().getText());
         }
         System.out.println(";Exiting identifier");
     }
@@ -212,7 +216,8 @@ public class ASTListener implements LittleListener {
 
     public void exitFunc_body(LittleParser.Func_bodyContext ctx) {
         System.out.println("Exiting func body");
-        tree.pop();
+        upOneLevel();
+        ((FuncDeclNode) current).funcBody = (FuncBodyNode) prev;
     }
 
     public void enterStmt_list(LittleParser.Stmt_listContext ctx) {
@@ -240,23 +245,38 @@ public class ASTListener implements LittleListener {
     public void exitStmt(LittleParser.StmtContext ctx) {
         System.out.println(";Exiting statement");
         upOneLevel();
+        if (((StatementNode) prev).baseStmt == null) {
+            return;
+        }
+        ((StatementListNode) current).stmt = (StatementNode) prev;
 
     }
 
     public void enterBase_stmt(LittleParser.Base_stmtContext ctx) {
-
+        System.out.println(";Entered base statement");
+        tree.push(new BaseStatements());
+        current = tree.peek();
     }
 
     public void exitBase_stmt(LittleParser.Base_stmtContext ctx) {
-
+        System.out.println(";Exited base statement");
+        upOneLevel();
+        if (((BaseStatements) prev).assignment == null) {
+            return;
+        }
+        ((StatementNode) current).baseStmt = (BaseStatements) prev;
     }
 
     public void enterAssign_stmt(LittleParser.Assign_stmtContext ctx) {
         System.out.println(";Entered assignment");
+        tree.push(new AssignStatementNode());
+        current = tree.peek();
     }
 
     public void exitAssign_stmt(LittleParser.Assign_stmtContext ctx) {
         System.out.println(";Exited assignment");
+        upOneLevel();
+        ((BaseStatements) current).assignment = (AssignStatementNode) prev;
     }
 
     public void enterAssign_expr(LittleParser.Assign_exprContext ctx) {
@@ -268,7 +288,7 @@ public class ASTListener implements LittleListener {
     public void exitAssign_expr(LittleParser.Assign_exprContext ctx) {
         System.out.println(";Exited assignment expression");
         upOneLevel();
-        ((BaseStatements) current).assignment = (AssignmentExprNode) prev;
+        ((AssignStatementNode) current).assignmentExpr = (AssignmentExprNode) prev;
     }
 
     public void enterRead_stmt(LittleParser.Read_stmtContext ctx) {
@@ -310,6 +330,8 @@ public class ASTListener implements LittleListener {
             ((ExpressionList) current).expr = (ExpressionNode) prev;
         } else if (current instanceof ExpressionListTail) {
             ((ExpressionListTail) current).expr = (ExpressionNode) prev;
+        } else if (current instanceof PrimaryNode) {
+            ((PrimaryNode) current).expressionNode = (ExpressionNode) prev;
         }
     }
 
@@ -322,6 +344,9 @@ public class ASTListener implements LittleListener {
     public void exitExpr_prefix(LittleParser.Expr_prefixContext ctx) {
         System.out.println(";Exiting expression prefix");
         upOneLevel();
+        if (((ExpressionPrefix) prev).factor == null && ((ExpressionPrefix) prev).prefix == null) {
+            return;
+        }
         if (current instanceof ExpressionNode) {
             ((ExpressionNode) current).prefix = (ExpressionPrefix) prev;
         } else if (current instanceof ExpressionPrefix) {
@@ -409,7 +434,13 @@ public class ASTListener implements LittleListener {
 
     public void exitPrimary(LittleParser.PrimaryContext ctx) {
         System.out.println(";Exiting primary");
-        tree.pop();
+        upOneLevel();
+        if (ctx.INTLITERAL() != null) {
+            ((PrimaryNode) prev).intLiteral = Integer.parseInt(ctx.INTLITERAL().getText());
+        } else if (ctx.FLOATLITERAL() != null) {
+            ((PrimaryNode) prev).floatLiteral = Float.parseFloat(ctx.FLOATLITERAL().getText());
+        }
+        ((PostfixNode) current).primary = (PrimaryNode) prev;
     }
 
     public void enterAddop(LittleParser.AddopContext ctx) {
@@ -417,7 +448,7 @@ public class ASTListener implements LittleListener {
     }
 
     public void exitAddop(LittleParser.AddopContext ctx) {
-
+        ((ExpressionPrefix) current).addOp = new AddOperator(ctx.PLUS() == null ? 1 : 0);
     }
 
     public void enterMulop(LittleParser.MulopContext ctx) {

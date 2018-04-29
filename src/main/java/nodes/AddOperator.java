@@ -1,11 +1,9 @@
 package nodes;
 
 public class AddOperator extends ASTNode {
-    Node leftChild;
-    Node rightChild;
     int sign;
 
-    public AddOperator() {
-
+    public AddOperator(int sign) {
+        this.sign = sign;
     }
 }
