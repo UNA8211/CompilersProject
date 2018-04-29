@@ -11,4 +11,12 @@ public class IDNode extends ASTNode {
     public String toString() {
         return val;
     }
+
+    @Override
+    public boolean isNull() {
+        if (val == null) {
+            return true;
+        }
+        return false;
+    }
 }

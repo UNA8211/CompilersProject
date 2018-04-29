@@ -8,4 +8,12 @@ public class FactorPrefixNode extends ASTNode {
     public FactorPrefixNode() {
 
     }
+
+    @Override
+    public boolean isNull() {
+        if (prefix == null && postfix == null && mulOp == null) {
+            return true;
+        }
+        return false;
+    }
 }

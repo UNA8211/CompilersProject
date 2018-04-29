@@ -9,4 +9,12 @@ public class PrimaryNode extends ASTNode {
     public PrimaryNode() {
 
     }
+
+    @Override
+    public boolean isNull() {
+        if (id == null && intLiteral == null && floatLiteral == null && expressionNode == null) {
+            return true;
+        }
+        return false;
+    }
 }

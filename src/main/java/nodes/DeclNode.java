@@ -7,6 +7,14 @@ public class DeclNode extends ASTNode {
     public DeclNode() {}
 
     @Override
+    public boolean isNull() {
+        if (varDecl == null && decl == null) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public String toString() {
         return (varDecl == null ? "" : varDecl.toString()) + " " + (decl == null ? "" : decl.toString());
     }

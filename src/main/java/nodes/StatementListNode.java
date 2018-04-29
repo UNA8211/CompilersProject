@@ -7,4 +7,12 @@ public class StatementListNode extends ASTNode {
     public StatementListNode() {
 
     }
+
+    @Override
+    public boolean isNull() {
+        if (stmt == null && statementList == null) {
+            return true;
+        }
+        return false;
+    }
 }

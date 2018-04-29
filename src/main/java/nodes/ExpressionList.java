@@ -7,4 +7,12 @@ public class ExpressionList extends ASTNode {
     public ExpressionList() {
 
     }
+
+    @Override
+    public boolean isNull() {
+        if (expr == null && tail == null) {
+            return true;
+        }
+        return false;
+    }
 }

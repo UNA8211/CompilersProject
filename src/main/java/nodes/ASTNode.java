@@ -1,8 +1,10 @@
 package nodes;
 
-public class ASTNode {
+public abstract class ASTNode {
 
     public ASTNode(){}
+
+    public abstract boolean isNull();
 
 }
 

@@ -7,7 +7,16 @@ public class VarTypeNode extends ASTNode {
         this.type = type;
     }
 
+    @Override
     public String toString() {
         return type;
+    }
+
+    @Override
+    public boolean isNull() {
+        if (type == null) {
+            return true;
+        }
+        return false;
     }
 }

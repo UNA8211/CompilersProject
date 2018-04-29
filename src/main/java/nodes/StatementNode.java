@@ -6,4 +6,12 @@ public class StatementNode extends ASTNode {
     public StatementNode() {
 
     }
+
+    @Override
+    public boolean isNull() {
+        if (baseStmt == null) {
+            return true;
+        }
+        return false;
+    }
 }

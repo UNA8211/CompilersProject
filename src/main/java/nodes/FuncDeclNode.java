@@ -7,4 +7,12 @@ public class FuncDeclNode extends ASTNode {
     public FuncDeclNode() {
 
     }
+
+    @Override
+    public boolean isNull() {
+        if (id == null && funcBody == null) {
+            return true;
+        }
+        return false;
+    }
 }

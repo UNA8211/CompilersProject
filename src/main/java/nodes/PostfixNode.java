@@ -6,4 +6,12 @@ public class PostfixNode extends ASTNode {
     public PostfixNode() {
 
     }
+
+    @Override
+    public boolean isNull() {
+        if (primary == null) {
+            return true;
+        }
+        return false;
+    }
 }

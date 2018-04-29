@@ -10,4 +10,12 @@ public class VarDeclNode extends ASTNode {
     public String toString() {
         return (type == null ? "" : type.toString()) + " " + (idList == null ? "" : idList.toString());
     }
+
+    @Override
+    public boolean isNull() {
+        if (type == null && idList == null) {
+            return true;
+        }
+        return false;
+    }
 }

@@ -5,4 +5,12 @@ public class ProgramBodyNode extends ASTNode {
     public FuncDecl funcDecl;
 
     public ProgramBodyNode() {}
+
+    @Override
+    public boolean isNull() {
+        if (decl == null && funcDecl == null) {
+            return true;
+        }
+        return false;
+    }
 }

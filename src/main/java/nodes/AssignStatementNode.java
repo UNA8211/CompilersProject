@@ -7,4 +7,12 @@ public class AssignStatementNode extends ASTNode {
     public AssignStatementNode() {
 
     }
+
+    @Override
+    public boolean isNull() {
+        if (assignmentExpr == null) {
+            return true;
+        }
+        return false;
+    }
 }
