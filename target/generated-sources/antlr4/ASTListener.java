@@ -1,4 +1,3 @@
-import nodes.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -20,66 +19,71 @@ public class ASTListener implements LittleListener {
     }
 
     public void enterId(LittleParser.IdContext ctx) {
-        System.out.println(";Entering identifier");
     }
 
     public void exitId(LittleParser.IdContext ctx) {
-        if (current instanceof IDListNode) {
-            ((IDListNode) current).identifier = new IDNode(ctx.IDENTIFIER().getText());
-        } else if (current instanceof IDTailNode) {
-            ((IDTailNode) current).identifier = new IDNode(ctx.IDENTIFIER().getText());
-        } else if (current instanceof FuncDeclNode) {
-            ((FuncDeclNode) current).id = new IDNode(ctx.IDENTIFIER().getText());
-        } else if (current instanceof PrimaryNode) {
-            ((PrimaryNode) current).id = new IDNode(ctx.IDENTIFIER().getText());
-        } else if (current instanceof AssignmentExprNode) {
-            ((AssignmentExprNode) current).identifier = new IDNode(ctx.IDENTIFIER().getText());
+        if (current instanceof ASTNode.IDListNode) {
+            ((ASTNode.IDListNode) current).identifier = new ASTNode.IDNode(ctx.IDENTIFIER().getText());
+        } else if (current instanceof ASTNode.IDTailNode) {
+            ((ASTNode.IDTailNode) current).identifier = new ASTNode.IDNode(ctx.IDENTIFIER().getText());
+        } else if (current instanceof ASTNode.FuncDeclNode) {
+            ((ASTNode.FuncDeclNode) current).id = new ASTNode.IDNode(ctx.IDENTIFIER().getText());
+        } else if (current instanceof ASTNode.PrimaryNode) {
+            ((ASTNode.PrimaryNode) current).id = new ASTNode.IDNode(ctx.IDENTIFIER().getText());
+        } else if (current instanceof ASTNode.AssignmentExprNode) {
+            ((ASTNode.AssignmentExprNode) current).identifier = new ASTNode.IDNode(ctx.IDENTIFIER().getText());
+        } else if (current instanceof ASTNode.StringDeclNode) {
+            ((ASTNode.StringDeclNode) current).identifier = new ASTNode.IDNode(ctx.IDENTIFIER().getText());
         }
-        System.out.println(";Exiting identifier");
     }
 
     public void enterPgm_body(LittleParser.Pgm_bodyContext ctx) {
-        System.out.println(";Entering program body");
-        tree.push(new ProgramBodyNode());
+        tree.push(new ASTNode.ProgramBodyNode());
         current = tree.peek();
     }
 
     public void exitPgm_body(LittleParser.Pgm_bodyContext ctx) {
-        System.out.println(";Exiting program body");
         prev = tree.pop();
     }
 
     public void enterDecl(LittleParser.DeclContext ctx) {
-        System.out.println(";Entering decl");
-        tree.push(new DeclNode());
+        tree.push(new ASTNode.DeclNode());
         current = tree.peek();
     }
 
     public void exitDecl(LittleParser.DeclContext ctx) {
-        System.out.println(";Exiting decl");
         prev = tree.pop();
         if (!tree.empty()) {
             current = tree.peek();
         }
-        if (((DeclNode) prev).isNull()) {
+        if (((ASTNode.DeclNode) prev).isNull()) {
             return;
         }
-        if (current instanceof ProgramBodyNode) {
-            ((ProgramBodyNode) current).decl = (DeclNode) prev;
-        } else if (current instanceof DeclNode) {
-            ((DeclNode) current).decl = (DeclNode) prev;
-        } else if (current instanceof FuncBodyNode) {
-            ((FuncBodyNode) current).decl = (DeclNode) prev;
+        if (current instanceof ASTNode.ProgramBodyNode) {
+            ((ASTNode.ProgramBodyNode) current).decl = (ASTNode.DeclNode) prev;
+        } else if (current instanceof ASTNode.DeclNode) {
+            ((ASTNode.DeclNode) current).decl = (ASTNode.DeclNode) prev;
+        } else if (current instanceof ASTNode.FuncBodyNode) {
+            ((ASTNode.FuncBodyNode) current).decl = (ASTNode.DeclNode) prev;
         }
 
     }
 
     public void enterString_decl(LittleParser.String_declContext ctx) {
-
+        tree.push(new ASTNode.StringDeclNode());
+        current = tree.peek();
     }
 
     public void exitString_decl(LittleParser.String_declContext ctx) {
+        upOneLevel();
+        if (((ASTNode.StringDeclNode) prev).isNull()) {
+            return;
+        }
 
+        if (current instanceof ASTNode.DeclNode) {
+            ((ASTNode.StringDeclNode) prev).value = ctx.str().STRINGLITERAL().getText();
+            ((ASTNode.DeclNode) current).stringDecl = (ASTNode.StringDeclNode) prev;
+        }
     }
 
     public void enterStr(LittleParser.StrContext ctx) {
@@ -91,31 +95,27 @@ public class ASTListener implements LittleListener {
     }
 
     public void enterVar_decl(LittleParser.Var_declContext ctx) {
-        System.out.println(";Entering var decl");
-        tree.push(new VarDeclNode());
+        tree.push(new ASTNode.VarDeclNode());
         current = tree.peek();
     }
 
     public void exitVar_decl(LittleParser.Var_declContext ctx) {
-        System.out.println(";Exiting var decl");
         upOneLevel();
-        if (((VarDeclNode) prev).isNull()) {
+        if (((ASTNode.VarDeclNode) prev).isNull()) {
             return;
         }
-        if (current instanceof DeclNode) {
-            ((DeclNode) current).varDecl = (VarDeclNode) prev;
+        if (current instanceof ASTNode.DeclNode) {
+            ((ASTNode.DeclNode) current).varDecl = (ASTNode.VarDeclNode) prev;
         }
     }
 
     public void enterVar_type(LittleParser.Var_typeContext ctx) {
-        System.out.println(";Entering var type");
     }
 
     public void exitVar_type(LittleParser.Var_typeContext ctx) {
-        if (current instanceof VarDeclNode) {
-            ((VarDeclNode) current).type = new VarTypeNode(ctx.FLOAT() == null ? ctx.INT().getText() : ctx.FLOAT().getText());
+        if (current instanceof ASTNode.VarDeclNode) {
+            ((ASTNode.VarDeclNode) current).type = new ASTNode.VarTypeNode(ctx.FLOAT() == null ? ctx.INT().getText() : ctx.FLOAT().getText());
         }
-        System.out.println(";Exiting var type");
     }
 
     public void enterAny_type(LittleParser.Any_typeContext ctx) {
@@ -127,207 +127,202 @@ public class ASTListener implements LittleListener {
     }
 
     public void enterId_list(LittleParser.Id_listContext ctx) {
-        System.out.println(";Entering id list");
-        tree.push(new IDListNode());
+        tree.push(new ASTNode.IDListNode());
         current = tree.peek();
     }
 
     public void exitId_list(LittleParser.Id_listContext ctx) {
-        System.out.println(";Exiting id list");
         upOneLevel();
-        if (((IDListNode) prev).isNull()) {
+        if (((ASTNode.IDListNode) prev).isNull()) {
             return;
         }
-        if (current instanceof VarDeclNode) {
-            ((VarDeclNode) current).idList = (IDListNode) prev;
+        if (current instanceof ASTNode.VarDeclNode) {
+            ((ASTNode.VarDeclNode) current).idList = (ASTNode.IDListNode) prev;
+        }
+
+        if (current instanceof ASTNode.ReadNode) {
+            ((ASTNode.ReadNode) current).idList = (ASTNode.IDListNode) prev;
+        }
+
+        if (current instanceof ASTNode.WriteNode) {
+            ((ASTNode.WriteNode) current).idList = (ASTNode.IDListNode) prev;
         }
     }
 
     public void enterId_tail(LittleParser.Id_tailContext ctx) {
-        System.out.println(";Entered id tail");
-        tree.push(new IDTailNode());
+        tree.push(new ASTNode.IDTailNode());
         current = tree.peek();
     }
 
     public void exitId_tail(LittleParser.Id_tailContext ctx) {
-        System.out.println(";Exited id tail");
         upOneLevel();
-        if (((IDTailNode) prev).isNull()) {
+        if (((ASTNode.IDTailNode) prev).isNull()) {
             return;
         }
-        if (current instanceof IDTailNode) {
-            ((IDTailNode) current).tail = (IDTailNode) prev;
-        } else if (current instanceof IDListNode) {
-            ((IDListNode) current).tail = (IDTailNode) prev;
+        if (current instanceof ASTNode.IDTailNode) {
+            ((ASTNode.IDTailNode) current).tail = (ASTNode.IDTailNode) prev;
+        } else if (current instanceof ASTNode.IDListNode) {
+            ((ASTNode.IDListNode) current).tail = (ASTNode.IDTailNode) prev;
         }
     }
 
     public void enterParam_decl_list(LittleParser.Param_decl_listContext ctx) {
-        System.out.println(";Entering param declaration list");
     }
 
     public void exitParam_decl_list(LittleParser.Param_decl_listContext ctx) {
-        System.out.println(";Exiting param declaration list");
     }
 
     public void enterParam_decl(LittleParser.Param_declContext ctx) {
-        System.out.println(";Entering param declaration");
     }
 
     public void exitParam_decl(LittleParser.Param_declContext ctx) {
-        System.out.println(";Exiting param declaration");
     }
 
     public void enterParam_decl_tail(LittleParser.Param_decl_tailContext ctx) {
-        System.out.println(";Entering param declaration tail");
     }
 
     public void exitParam_decl_tail(LittleParser.Param_decl_tailContext ctx) {
-        System.out.println(";Entering param declaration tail");
     }
 
     public void enterFunc_declarations(LittleParser.Func_declarationsContext ctx) {
-        System.out.println(";Entering function decl");
-        tree.push(new FuncDecl());
+        tree.push(new ASTNode.FuncDecl());
         current= tree.peek();
     }
 
     public void exitFunc_declarations(LittleParser.Func_declarationsContext ctx) {
-        System.out.println(";Exiting function decl");
         upOneLevel();
-        if (((FuncDecl) prev).isNull()) {
+        if (((ASTNode.FuncDecl) prev).isNull()) {
             return;
         }
-        if (current instanceof FuncDecl) {
-            ((FuncDecl) current).funcDeclaration = (FuncDecl) prev;
-        } else if (current instanceof ProgramBodyNode) {
-            ((ProgramBodyNode) current).funcDecl = (FuncDecl) prev;
+        if (current instanceof ASTNode.FuncDecl) {
+            ((ASTNode.FuncDecl) current).funcDeclaration = (ASTNode.FuncDecl) prev;
+        } else if (current instanceof ASTNode.ProgramBodyNode) {
+            ((ASTNode.ProgramBodyNode) current).funcDecl = (ASTNode.FuncDecl) prev;
         }
     }
 
     public void enterFunc_decl(LittleParser.Func_declContext ctx) {
-        System.out.println(";Entering func decl");
-        tree.push(new FuncDeclNode());
+        tree.push(new ASTNode.FuncDeclNode());
         current = tree.peek();
     }
 
     public void exitFunc_decl(LittleParser.Func_declContext ctx) {
-        System.out.println(";Exiting func decl");
         upOneLevel();
-        if (((FuncDeclNode) prev).isNull()) {
+        if (((ASTNode.FuncDeclNode) prev).isNull()) {
             return;
         }
-        ((FuncDecl) current).funcDecl = (FuncDeclNode) prev;
+        ((ASTNode.FuncDecl) current).funcDecl = (ASTNode.FuncDeclNode) prev;
     }
 
     public void enterFunc_body(LittleParser.Func_bodyContext ctx) {
-        System.out.println("Entering func body");
-        tree.push(new FuncBodyNode());
+        tree.push(new ASTNode.FuncBodyNode());
         current = tree.peek();
     }
 
     public void exitFunc_body(LittleParser.Func_bodyContext ctx) {
-        System.out.println("Exiting func body");
         upOneLevel();
-        if (((FuncBodyNode) prev).isNull()) {
+        if (((ASTNode.FuncBodyNode) prev).isNull()) {
             return;
         }
-        ((FuncDeclNode) current).funcBody = (FuncBodyNode) prev;
+        ((ASTNode.FuncDeclNode) current).funcBody = (ASTNode.FuncBodyNode) prev;
     }
 
     public void enterStmt_list(LittleParser.Stmt_listContext ctx) {
-        System.out.println(";Entering statement list");
-        tree.push(new StatementListNode());
+        tree.push(new ASTNode.StatementListNode());
         current = tree.peek();
     }
 
     public void exitStmt_list(LittleParser.Stmt_listContext ctx) {
-        System.out.println(";Exiting statement list");
         upOneLevel();
-        if (((StatementListNode) prev).isNull()) {
+        if (((ASTNode.StatementListNode) prev).isNull()) {
             return;
         }
-        if (current instanceof FuncBodyNode) {
-            ((FuncBodyNode) current).stmtList = (StatementListNode) prev;
-        } else if (current instanceof  StatementListNode) {
-            ((StatementListNode) current).statementList = (StatementListNode) prev;
+        if (current instanceof ASTNode.FuncBodyNode) {
+            ((ASTNode.FuncBodyNode) current).stmtList = (ASTNode.StatementListNode) prev;
+        } else if (current instanceof ASTNode. StatementListNode) {
+            ((ASTNode.StatementListNode) current).statementList = (ASTNode.StatementListNode) prev;
         }
     }
 
     public void enterStmt(LittleParser.StmtContext ctx) {
-        System.out.println(";Entering statement");
-        tree.push(new StatementNode());
+        tree.push(new ASTNode.StatementNode());
         current = tree.peek();
     }
 
     public void exitStmt(LittleParser.StmtContext ctx) {
-        System.out.println(";Exiting statement");
         upOneLevel();
-        if (((StatementNode) prev).isNull()) {
+        if (((ASTNode.StatementNode) prev).isNull()) {
             return;
         }
-        ((StatementListNode) current).stmt = (StatementNode) prev;
+        ((ASTNode.StatementListNode) current).stmt = (ASTNode.StatementNode) prev;
 
     }
 
     public void enterBase_stmt(LittleParser.Base_stmtContext ctx) {
-        System.out.println(";Entered base statement");
-        tree.push(new BaseStatements());
+        tree.push(new ASTNode.BaseStatements());
         current = tree.peek();
     }
 
     public void exitBase_stmt(LittleParser.Base_stmtContext ctx) {
-        System.out.println(";Exited base statement");
         upOneLevel();
-        if (((BaseStatements) prev).isNull()) {
+        if (((ASTNode.BaseStatements) prev).isNull()) {
             return;
         }
-        ((StatementNode) current).baseStmt = (BaseStatements) prev;
+
+        ((ASTNode.StatementNode) current).baseStmt = (ASTNode.BaseStatements) prev;
     }
 
     public void enterAssign_stmt(LittleParser.Assign_stmtContext ctx) {
-        System.out.println(";Entered assignment");
-        tree.push(new AssignStatementNode());
+        tree.push(new ASTNode.AssignStatementNode());
         current = tree.peek();
     }
 
     public void exitAssign_stmt(LittleParser.Assign_stmtContext ctx) {
-        System.out.println(";Exited assignment");
         upOneLevel();
-        if (((AssignStatementNode) prev).isNull()) {
+        if (((ASTNode.AssignStatementNode) prev).isNull()) {
             return;
         }
-        ((BaseStatements) current).assignment = (AssignStatementNode) prev;
+        ((ASTNode.BaseStatements) current).assignment = (ASTNode.AssignStatementNode) prev;
     }
 
     public void enterAssign_expr(LittleParser.Assign_exprContext ctx) {
-        System.out.println(";Entered assignment expression");
-        tree.push(new AssignmentExprNode());
+        tree.push(new ASTNode.AssignmentExprNode());
         current = tree.peek();
     }
 
     public void exitAssign_expr(LittleParser.Assign_exprContext ctx) {
-        System.out.println(";Exited assignment expression");
         upOneLevel();
-        if (((AssignmentExprNode) prev).isNull()) {
+        if (((ASTNode.AssignmentExprNode) prev).isNull()) {
             return;
         }
-        ((AssignStatementNode) current).assignmentExpr = (AssignmentExprNode) prev;
+        ((ASTNode.AssignStatementNode) current).assignmentExpr = (ASTNode.AssignmentExprNode) prev;
     }
 
     public void enterRead_stmt(LittleParser.Read_stmtContext ctx) {
-
+        tree.push(new ASTNode.ReadNode());
+        current = tree.peek();
     }
 
     public void exitRead_stmt(LittleParser.Read_stmtContext ctx) {
-
+        upOneLevel();
+        if (((ASTNode.ReadNode) prev).isNull()) {
+            return;
+        }
+        ((ASTNode.BaseStatements) current).read = (ASTNode.ReadNode) prev;
     }
 
     public void enterWrite_stmt(LittleParser.Write_stmtContext ctx) {
-
+        tree.push(new ASTNode.WriteNode());
+        current = tree.peek();
     }
 
     public void exitWrite_stmt(LittleParser.Write_stmtContext ctx) {
+        upOneLevel();
+        if (((ASTNode.WriteNode) prev).isNull()) {
+            return;
+        }
+
+        ((ASTNode.BaseStatements) current).write = (ASTNode.WriteNode) prev;
 
     }
 
@@ -340,101 +335,91 @@ public class ASTListener implements LittleListener {
     }
 
     public void enterExpr(LittleParser.ExprContext ctx) {
-        System.out.println(";Entered Expression");
-        tree.push(new ExpressionNode());
+        tree.push(new ASTNode.ExpressionNode());
         current = tree.peek();
     }
 
     public void exitExpr(LittleParser.ExprContext ctx) {
-        System.out.println(";Exited expression");
         upOneLevel();
-        if (((ExpressionNode) prev).isNull()) {
+        if (((ASTNode.ExpressionNode) prev).isNull()) {
             return;
         }
-        if (current instanceof AssignmentExprNode) {
-            ((AssignmentExprNode) current).expr = (ExpressionNode) prev;
-        } else if (current instanceof ExpressionList) {
-            ((ExpressionList) current).expr = (ExpressionNode) prev;
-        } else if (current instanceof ExpressionListTail) {
-            ((ExpressionListTail) current).expr = (ExpressionNode) prev;
-        } else if (current instanceof PrimaryNode) {
-            ((PrimaryNode) current).expressionNode = (ExpressionNode) prev;
+        if (current instanceof ASTNode.AssignmentExprNode) {
+            ((ASTNode.AssignmentExprNode) current).expr = (ASTNode.ExpressionNode) prev;
+        } else if (current instanceof ASTNode.ExpressionList) {
+            ((ASTNode.ExpressionList) current).expr = (ASTNode.ExpressionNode) prev;
+        } else if (current instanceof ASTNode.ExpressionListTail) {
+            ((ASTNode.ExpressionListTail) current).expr = (ASTNode.ExpressionNode) prev;
+        } else if (current instanceof ASTNode.PrimaryNode) {
+            ((ASTNode.PrimaryNode) current).expressionNode = (ASTNode.ExpressionNode) prev;
         }
     }
 
     public void enterExpr_prefix(LittleParser.Expr_prefixContext ctx) {
-        System.out.println(";Entered Expr prefix");
-        tree.push(new ExpressionPrefix());
+        tree.push(new ASTNode.ExpressionPrefix());
         current = tree.peek();
     }
 
     public void exitExpr_prefix(LittleParser.Expr_prefixContext ctx) {
-        System.out.println(";Exiting expression prefix");
         upOneLevel();
-        if (((ExpressionPrefix) prev).isNull()) {
+        if (((ASTNode.ExpressionPrefix) prev).isNull()) {
             return;
         }
-        if (current instanceof ExpressionNode) {
-            ((ExpressionNode) current).prefix = (ExpressionPrefix) prev;
-        } else if (current instanceof ExpressionPrefix) {
-            ((ExpressionPrefix) current).prefix = (ExpressionPrefix) prev;
+        if (current instanceof ASTNode.ExpressionNode) {
+            ((ASTNode.ExpressionNode) current).prefix = (ASTNode.ExpressionPrefix) prev;
+        } else if (current instanceof ASTNode.ExpressionPrefix) {
+            ((ASTNode.ExpressionPrefix) current).prefix = (ASTNode.ExpressionPrefix) prev;
         }
     }
 
     public void enterFactor(LittleParser.FactorContext ctx) {
-        System.out.println(";Entering factor");
-        tree.push(new FactorNode());
+        tree.push(new ASTNode.FactorNode());
         current = tree.peek();
     }
 
     public void exitFactor(LittleParser.FactorContext ctx) {
-        System.out.println(";Exiting factor");
         upOneLevel();
-        if (((FactorNode) prev).isNull()) {
+        if (((ASTNode.FactorNode) prev).isNull()) {
             return;
         }
-        if (current instanceof ExpressionNode) {
-            ((ExpressionNode) current).factor = (FactorNode) prev;
-        } else if (current instanceof ExpressionPrefix) {
-            ((ExpressionPrefix) current).factor = (FactorNode) prev;
+        if (current instanceof ASTNode.ExpressionNode) {
+            ((ASTNode.ExpressionNode) current).factor = (ASTNode.FactorNode) prev;
+        } else if (current instanceof ASTNode.ExpressionPrefix) {
+            ((ASTNode.ExpressionPrefix) current).factor = (ASTNode.FactorNode) prev;
         }
     }
 
     public void enterFactor_prefix(LittleParser.Factor_prefixContext ctx) {
-        System.out.println(";Entering factor prefix");
-        tree.push(new FactorPrefixNode());
+        tree.push(new ASTNode.FactorPrefixNode());
         current = tree.peek();
     }
 
     public void exitFactor_prefix(LittleParser.Factor_prefixContext ctx) {
-        System.out.println(";Exiting factor prefix");
         upOneLevel();
-        if (((FactorPrefixNode) prev).isNull()) {
+        if (((ASTNode.FactorPrefixNode) prev).isNull()) {
             return;
         }
-        if (current instanceof FactorNode) {
-            ((FactorNode) current).prefix = (FactorPrefixNode) prev;
-        } else if (current instanceof FactorPrefixNode) {
-            ((FactorPrefixNode) current).prefix = (FactorPrefixNode) prev;
+        if (current instanceof ASTNode.FactorNode) {
+            ((ASTNode.FactorNode) current).prefix = (ASTNode.FactorPrefixNode) prev;
+        } else if (current instanceof ASTNode.FactorPrefixNode) {
+            ((ASTNode.FactorPrefixNode) current).prefix = (ASTNode.FactorPrefixNode) prev;
         }
     }
 
     public void enterPostfix_expr(LittleParser.Postfix_exprContext ctx) {
-        System.out.println(";Entering postfix");
-        tree.push(new PostfixNode());
+        tree.push(new ASTNode.PostfixNode());
         current = tree.peek();
     }
 
     public void exitPostfix_expr(LittleParser.Postfix_exprContext ctx) {
-        System.out.println(";Exiting postfix");
         upOneLevel();
-        if (((PostfixNode) prev).isNull()) {
+        if (((ASTNode.PostfixNode) prev).isNull()) {
             return;
         }
-        if (current instanceof FactorNode) {
-            ((FactorNode) current).postfix = (PostfixNode) prev;
-        } else if (current instanceof FactorPrefixNode) {
-            ((FactorPrefixNode) current).postfix = (PostfixNode) prev;
+        if (current instanceof ASTNode.FactorNode) {
+            ((ASTNode.FactorNode) current).postfix = (ASTNode.PostfixNode) prev;
+        } else if (current instanceof ASTNode.FactorPrefixNode) {
+            ((ASTNode.FactorPrefixNode) current).postfix = (ASTNode.PostfixNode) prev;
         }
     }
 
@@ -463,20 +448,18 @@ public class ASTListener implements LittleListener {
     }
 
     public void enterPrimary(LittleParser.PrimaryContext ctx) {
-        System.out.println(";Entering primary");
-        tree.push(new PrimaryNode());
+        tree.push(new ASTNode.PrimaryNode());
         current = tree.peek();
     }
 
     public void exitPrimary(LittleParser.PrimaryContext ctx) {
-        System.out.println(";Exiting primary");
         upOneLevel();
         if (ctx.INTLITERAL() != null) {
-            ((PrimaryNode) prev).intLiteral = Integer.parseInt(ctx.INTLITERAL().getText());
+            ((ASTNode.PrimaryNode) prev).intLiteral = Integer.parseInt(ctx.INTLITERAL().getText());
         } else if (ctx.FLOATLITERAL() != null) {
-            ((PrimaryNode) prev).floatLiteral = Float.parseFloat(ctx.FLOATLITERAL().getText());
+            ((ASTNode.PrimaryNode) prev).floatLiteral = Float.parseFloat(ctx.FLOATLITERAL().getText());
         }
-        ((PostfixNode) current).primary = (PrimaryNode) prev;
+        ((ASTNode.PostfixNode) current).primary = (ASTNode.PrimaryNode) prev;
     }
 
     public void enterAddop(LittleParser.AddopContext ctx) {
@@ -484,7 +467,7 @@ public class ASTListener implements LittleListener {
     }
 
     public void exitAddop(LittleParser.AddopContext ctx) {
-        ((ExpressionPrefix) current).addOp = new AddOperator(ctx.PLUS() == null ? 1 : 0);
+        ((ASTNode.ExpressionPrefix) current).addOp = new ASTNode.AddOperator(ctx.PLUS() == null ? 1 : 0);
     }
 
     public void enterMulop(LittleParser.MulopContext ctx) {
@@ -492,7 +475,7 @@ public class ASTListener implements LittleListener {
     }
 
     public void exitMulop(LittleParser.MulopContext ctx) {
-        ((FactorPrefixNode) current).mulOp = new MulopNode(ctx.MULTIPLY() == null ? 1 : 0);
+        ((ASTNode.FactorPrefixNode) current).mulOp = new ASTNode.MulopNode(ctx.MULTIPLY() == null ? 1 : 0);
     }
 
     public void enterIf_stmt(LittleParser.If_stmtContext ctx) {
