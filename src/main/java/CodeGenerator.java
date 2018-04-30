@@ -120,7 +120,7 @@ public class CodeGenerator {
 
     private void createAssignmentCode(GenericTreeNode node) {
         GenericTreeNode currentNode = node;
-        while (!currentNode.children.isEmpty()) {
+        while (!currentNode.children.isEmpty() && currentNode.children.size() > 1) {
             currentNode = currentNode.children.get(1);
         }
         while (currentNode.parent != null) {
@@ -134,6 +134,10 @@ public class CodeGenerator {
 
             if (currentNode.type.equals("AddOp")) {
                 System.out.println((currentNode.val.equals("+") ? "addi" : "subi") + ' ' + currentNode.children.get(0).val + " r" + (currentTemp - 1));
+            }
+
+            if (currentNode.type.equals("MulOp")) {
+                System.out.println((currentNode.val.equals("+") ? "muli" : "subi") + ' ' + currentNode.children.get(0).val + " r" + (currentTemp - 1));
             }
             currentNode = currentNode.parent;
         }
@@ -174,8 +178,9 @@ public class CodeGenerator {
             } else {
                 node.val = "-";
             }
-            node.children.add(parent.children.get(1));
-            parent.children.remove(1);
+            GenericTreeNode prev = parent.children.get(1);
+            prev.parent = node;
+            node.children.add(prev);
             parent.children.add(node);
             node.parent = parent;
         }
@@ -183,7 +188,7 @@ public class CodeGenerator {
 
     public void walkThroughFactor(ASTNode.FactorNode factor, GenericTreeNode parent) {
         if (factor.prefix != null) {
-            walkThroughFactorPrefix(factor.prefix, parent);
+            walkThroughFactorPrefix(factor.prefix, parent.children.size() <= 1 ? parent : parent.children.get(1));
         }
 
         if (factor.postfix != null) {
@@ -192,7 +197,34 @@ public class CodeGenerator {
     }
 
     public void walkThroughFactorPrefix(ASTNode.FactorPrefixNode prefix, GenericTreeNode parent) {
+        if (prefix.prefix != null) {
+            walkThroughFactorPrefix(prefix.prefix, parent);
+        }
 
+        if (prefix.postfix != null) {
+            walkThroughPostFix(prefix.postfix, parent);
+        }
+
+        if (prefix.mulOp != null) {
+            walkThroughMulOp(prefix.mulOp, parent);
+        }
+    }
+
+    private void walkThroughMulOp(ASTNode.MulopNode mulOp, GenericTreeNode parent) {
+        if (mulOp != null) {
+            GenericTreeNode node = new GenericTreeNode();
+            node.type = "MulOp";
+            if (mulOp.op == 0) {
+                node.val = "*";
+            } else {
+                node.val = "/";
+            }
+            GenericTreeNode prev = parent.children.get(1);
+            prev.parent = node;
+            node.children.add(prev);
+            parent.children.add(node);
+            node.parent = parent;
+        }
     }
 
     public void walkThroughPostFix(ASTNode.PostfixNode postfix, GenericTreeNode parent) {
